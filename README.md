@@ -1,5 +1,7 @@
 # ECG Backend
 
+[![Run Tests](https://github.com/dnmellen/ecg-backend/actions/workflows/tests.yml/badge.svg)](https://github.com/dnmellen/ecg-backend/actions/workflows/tests.yml)
+
 ## Quickstart
 
 ### Prerequisites
