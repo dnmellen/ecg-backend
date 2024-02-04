@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from app.api.routers.users import router as users_router
 from app.api.routers.auth import router as auth_router
+from app.api.routers.ecg import router as ecg_router
 from app.config import settings
 from app.models.database import sessionmanager
 from fastapi import FastAPI
@@ -46,6 +47,7 @@ async def root():
 # Routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(ecg_router)
 
 
 if __name__ == "__main__":

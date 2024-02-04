@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 from typing import Generic, TypeVar
 from sqlalchemy import select
@@ -23,11 +24,18 @@ class EntityDAL(Generic[T]):
         await self.db_session.refresh(entity)
         return entity
 
+    async def create_bulk(self, entities: Sequence[T]) -> bool:
+        self.db_session.add_all(entities)
+        await self.db_session.commit()
+        return True
+
     async def list(self, where_expr: BinaryExpression | None = None) -> list[T]:
         if where_expr is None:
-            results = await self.db_session.exec(select(self.model))
+            results = await self.db_session.execute(select(self.model))
         else:
-            results = await self.db_session.exec(select(self.model).where(where_expr))
+            results = await self.db_session.execute(
+                select(self.model).where(where_expr)
+            )
         items = results.all()
         return items
 

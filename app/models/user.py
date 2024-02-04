@@ -2,7 +2,7 @@ from typing import Literal, get_args
 import uuid
 from sqlalchemy import String, Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.dal import EntityDAL
 
 from . import Base
@@ -27,6 +27,8 @@ class User(Base):
         )
     )
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+
+    ecgs: Mapped[list["ECG"]] = relationship("ECG", back_populates="user")  # noqa F821
 
 
 class UserDAL(EntityDAL[User]):
