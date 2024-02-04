@@ -1,7 +1,7 @@
 import datetime
 from typing import Annotated, Sequence
 import uuid
-from sqlalchemy import Date, ForeignKey, Integer, String
+from sqlalchemy import Date, ForeignKey, Integer, String, and_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.dal import EntityDAL
@@ -14,16 +14,16 @@ uuidpk = Annotated[uuid.UUID, mapped_column(primary_key=True)]
 class ECG(Base):
     __tablename__ = "ecg"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("user.id")
     )
     user: Mapped["User"] = relationship("User", back_populates="ecgs")  # noqa F821
 
-    signals: Mapped[list["Signal"]] = relationship("Signal", back_populates="ecg")
+    signals: Mapped[list["Signal"]] = relationship(
+        "Signal", back_populates="ecg", cascade="all, delete-orphan"
+    )  # noqa F821
 
 
 class ECGDAL(EntityDAL[ECG]):
@@ -32,7 +32,10 @@ class ECGDAL(EntityDAL[ECG]):
     model = ECG
 
     async def get_by_user(self, user: uuid.UUID, egc_id: uuid.UUID) -> ECG | None:
-        return await self.list(ECG.user_id == user, ECG.id == egc_id).first()
+        try:
+            return (await self.list(and_(ECG.user_id == user, ECG.id == egc_id)))[0][0]
+        except IndexError:
+            return None
 
     async def list_by_user(self, user: uuid.UUID) -> Sequence[ECG]:
         return (e[0] for e in await self.list(ECG.user_id == user))

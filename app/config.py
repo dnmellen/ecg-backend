@@ -16,5 +16,7 @@ class Settings(BaseSettings):
     cors_allow_headers: list[str] = ["*"]
     auth_password_min_length: int = 4
 
+    max_signal_buffer: int = 50
+
 
 settings = Settings()  # type: ignore

@@ -60,6 +60,6 @@ class EntityDAL(Generic[T]):
         return entity
 
     async def delete(self, entity: T) -> T:
-        self.db_session.delete(entity)
+        await self.db_session.delete(entity)
         await self.db_session.commit()
         return entity

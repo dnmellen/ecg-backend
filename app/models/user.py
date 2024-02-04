@@ -28,7 +28,9 @@ class User(Base):
     )
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
 
-    ecgs: Mapped[list["ECG"]] = relationship("ECG", back_populates="user")  # noqa F821
+    ecgs: Mapped[list["ECG"]] = relationship(  # noqa F821
+        "ECG", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserDAL(EntityDAL[User]):
