@@ -19,3 +19,11 @@ docker compose up -d
 ```
 
 This will start the application and the database. The application will be available at `http://localhost:8000`.
+
+### Create admin user
+
+Creating an admin user is necessary to create other users. To create an admin user, execute the following command:
+
+```bash
+scripts/create_admin_user.sh admin
+```
