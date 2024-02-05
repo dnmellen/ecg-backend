@@ -38,12 +38,6 @@ app.add_middleware(
     allow_headers=settings.cors_allow_headers,
 )
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
 # Routers
 app.include_router(auth_router)
 app.include_router(users_router)
