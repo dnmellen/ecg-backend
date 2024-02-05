@@ -5,7 +5,7 @@ from app.api.dependencies.core import DBSessionDep
 from app.api.dependencies.user import CurrentUserDep
 from fastapi import APIRouter, HTTPException, UploadFile
 from app.models.ecg import ECGDAL, Signal as SignalModel, ECG as ECGModel
-from app.schemas.ecg import ECG, Signal
+from app.schemas.ecg import ECG, ECGDetail, Signal
 from app.utils.core import BufferedStorage
 from app.config import settings
 
@@ -127,3 +127,21 @@ async def create_ecg(
         raise HTTPException(status_code=422, detail="Invalid input")
 
     return ECG(id=ecg_id, user=current_user.id)
+
+
+@router.get(
+    "/{ecg_id}",
+    response_model=ECG,
+)
+async def get_ecg(
+    current_user: CurrentUserDep,
+    ecg_id: str,
+    db_session: DBSessionDep,
+) -> ECGDetail:
+    """
+    Get an ecg by id with data insights
+    """
+    ecg_dal = ECGDAL(db_session)
+    if not (ecg := await ecg_dal.get_by_user(current_user.id, ecg_id)):
+        raise HTTPException(status_code=404, detail="ECG not found")
+    return ECGDetail(id=ecg.id, user=ecg.user_id)

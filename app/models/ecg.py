@@ -1,7 +1,7 @@
 import datetime
-from typing import Annotated, Sequence
+from typing import Annotated, Literal, Sequence, get_args
 import uuid
-from sqlalchemy import Date, ForeignKey, Integer, String, and_
+from sqlalchemy import JSON, Date, DateTime, Enum, ForeignKey, Integer, String, and_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.dal import EntityDAL
@@ -23,6 +23,10 @@ class ECG(Base):
 
     signals: Mapped[list["Signal"]] = relationship(
         "Signal", back_populates="ecg", cascade="all, delete-orphan"
+    )  # noqa F821
+
+    analyses: Mapped[list["DataAnalysis"]] = relationship(
+        "DataAnalysis", back_populates="ecg", cascade="all, delete-orphan"
     )  # noqa F821
 
 
@@ -64,3 +68,42 @@ class SignalDAL(EntityDAL[Signal]):
 
     async def get_by_ecg(self, ecg: uuid.UUID) -> Sequence[Signal]:
         return await self.list(Signal.ecg_id == ecg)
+
+
+AnalysisStatus = Literal["created", "processing", "completed", "failed"]
+
+
+class DataAnalysis(Base):
+    __tablename__ = "data_analysis"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    ecg_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ecg.id"))
+    ecg: Mapped[ECG] = relationship("ECG", back_populates="analyses")
+    created: Mapped[datetime.datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.datetime.now
+    )
+    finished: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[AnalysisStatus] = mapped_column(
+        Enum(
+            *get_args(AnalysisStatus),
+            name="analysisstatus",
+            create_constraint=True,
+            validate_strings=True,
+            nullable=False,
+        ),
+        index=True,
+        default="created",
+    )
+    result: Mapped[dict] = mapped_column(JSON, nullable=False, default={})
+
+
+class DataAnalysisDAL(EntityDAL[DataAnalysis]):
+    """Data Access Layer for DataAnalysis entities"""
+
+    model = DataAnalysis
+
+    async def list_by_ecg(self, ecg: uuid.UUID) -> Sequence[DataAnalysis]:
+        return await self.list(DataAnalysis.ecg_id == ecg)
