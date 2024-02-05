@@ -6,7 +6,7 @@
 
 ### Prerequisites
 
-- Docker
+- Docker & Docker Compose
 
 ### Running the application
 
@@ -15,18 +15,10 @@ Notice that the `.env.docker` file is used to set the environment variables for 
 To run the application, execute the following command:
 
 ```bash
-docker compose up -d
+./run_dev.sh
 ```
 
 This will start the application and the database. The application will be available at `http://localhost:8000`.
-
-### Create admin user
-
-Creating an admin user is necessary to create other users. To create an admin user, execute the following command:
-
-```bash
-scripts/create_admin_user.sh admin
-```
 
 ### Run the api as a development server in foreground
 
@@ -35,3 +27,8 @@ This way of running the application is useful for development. It will start the
 ```bash
 docker-compose run --rm --service-ports api
 ```
+
+## Documentation
+
+- API Docs: [http://localhost:8000/docs](http://localhost:8000/docs).
+- Project documentation: ???.
