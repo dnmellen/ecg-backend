@@ -2,9 +2,9 @@
 
 To upload an ECG, you need to be logged in as a user. If you are not logged in, you can follow the instructions in the [User login](auth/user_login.md) section.
 
-Once you are logged in, go to [http://localhost:8000/api/docs](http://localhost:8000/api/docs) and click on the `POST /ecgs/` endpoint. Then, fill in the form with the following data:
+Once you are logged in, go to [http://localhost:8000/api/docs](http://localhost:8000/api/docs) and click on the `POST /api/ecgs/` endpoint. Then, fill in the form with the following data:
 
-- file: `<file>`
+- file: `<file>` (There is a sample file in `assets/example_ecg.json`)
 
 ![Upload ECG](../img/upload_ecg_1.jpg "Screenshot of the Upload ECG form")
 
