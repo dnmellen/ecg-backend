@@ -1,7 +1,7 @@
 from enum import Enum
 from datetime import date, datetime
 
-from pydantic import UUID4, BaseModel, ConfigDict, Field, Json
+from pydantic import UUID4, BaseModel, ConfigDict, Field, computed_field
 
 
 class LeadName(str, Enum):
@@ -62,8 +62,9 @@ class DataAnalysis(BaseModel):
     finished: datetime | None = None
     name: str
     status: AnalysisStatus = Field(default=AnalysisStatus.CREATED)
-    result: Json
+    result: dict
 
+    @computed_field
     @property
     def duration(self) -> float:
         """Analysis duration"""

@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime
 
 from sqlalchemy import text
 
@@ -41,6 +42,7 @@ class NumCrossesZeroSignalProcessor(SignalProcessor):
 
         # Update data analysis
         data_analysis.result = data
+        data_analysis.finished = datetime.now()
         data_analysis.status = AnalysisStatus.COMPLETED
         await data_analysis_dal.update(data_analysis)
 

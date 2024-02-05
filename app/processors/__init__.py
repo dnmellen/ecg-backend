@@ -30,9 +30,9 @@ class SignalProcessor(ABC):
         )
 
 
-def process_signals_task(signal_processor: SignalProcessor, ecg_id: UUID) -> None:
+async def process_signals_task(signal_processor: SignalProcessor, ecg_id: UUID) -> None:
     """Background task to process signals"""
-    signal_processor.process(ecg_id)
+    await signal_processor.process(ecg_id)
 
 
 def get_all_processors() -> list[SignalProcessor]:

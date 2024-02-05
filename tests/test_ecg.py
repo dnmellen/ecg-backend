@@ -1,9 +1,12 @@
 from io import BytesIO
 import json
 from unittest.mock import MagicMock
+import uuid
 from httpx import AsyncClient
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.processors import process_signals_task
+from app.processors.num_crosses_zero import NumCrossesZeroSignalProcessor
 
 from app.schemas.user import User
 
@@ -82,3 +85,63 @@ async def test_create_ecg_twice(
             "id": json.loads(json_input)["id"],
             "user": str(user.id),
         }
+
+
+@pytest.mark.parametrize(
+    "create_ecg, run_task, status_code",
+    [
+        (True, True, 200),  # valid input
+        (True, False, 200),  # valid input, no task
+        (False, False, 404),  # invalid input, no task
+    ],
+)
+@pytest.mark.asyncio
+async def test_get_ecg_detail(
+    db_session: AsyncSession,
+    user: User,
+    authenticated_client_user: AsyncClient,
+    create_ecg: bool,
+    run_task: bool,
+    status_code: int,
+) -> None:
+    # Create ECG
+    if create_ecg:
+        ecg_id = await generate_ecg_with_random_signals(db_session, user)
+    else:
+        ecg_id = uuid.uuid4()
+
+    # Process signals manually
+    if run_task:
+        processor = NumCrossesZeroSignalProcessor(db_session)
+        await process_signals_task(processor, ecg_id)
+
+    # Get ECG detail
+    response = await authenticated_client_user.get(f"/api/ecgs/{ecg_id}")
+    assert response.status_code == status_code
+    if response.status_code == 200:
+        data = response.json()
+        assert data["id"] == str(ecg_id)
+        assert data["user"] == str(user.id)
+        if run_task:
+            assert len(data["analyses"]) == 1
+            assert data["analyses"][0]["name"] == "num_crosses_zero"
+            assert data["analyses"][0]["status"] == "completed"
+            assert data["analyses"][0]["result"].keys() == {
+                "I",
+                "II",
+                "III",
+                "aVR",
+                "aVL",
+                "aVF",
+                "V1",
+                "V2",
+                "V3",
+                "V4",
+                "V5",
+                "V6",
+            }
+        else:
+            assert len(data["analyses"]) == 0
+    await (
+        db_session.rollback()
+    )  # rollback the transaction to avoid side effects between parametrized tests

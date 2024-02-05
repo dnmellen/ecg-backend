@@ -26,7 +26,10 @@ class ECG(Base):
     )  # noqa F821
 
     analyses: Mapped[list["DataAnalysis"]] = relationship(
-        "DataAnalysis", back_populates="ecg", cascade="all, delete-orphan"
+        "DataAnalysis",
+        back_populates="ecg",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )  # noqa F821
 
 

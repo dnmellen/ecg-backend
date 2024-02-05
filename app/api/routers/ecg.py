@@ -6,7 +6,7 @@ from app.api.dependencies.user import CurrentUserDep
 from fastapi import APIRouter, HTTPException, UploadFile, BackgroundTasks
 from app.models.ecg import ECGDAL, Signal as SignalModel, ECG as ECGModel
 from app.processors import process_signals
-from app.schemas.ecg import ECG, ECGDetail, Signal
+from app.schemas.ecg import ECG, DataAnalysis, ECGDetail, Signal
 from app.utils.core import BufferedStorage
 from app.config import settings
 
@@ -138,7 +138,7 @@ async def create_ecg(
 
 @router.get(
     "/{ecg_id}",
-    response_model=ECG,
+    response_model=ECGDetail,
 )
 async def get_ecg(
     current_user: CurrentUserDep,
@@ -149,6 +149,8 @@ async def get_ecg(
     Get an ecg by id with data insights
     """
     ecg_dal = ECGDAL(db_session)
-    if not (ecg := await ecg_dal.get_by_user(current_user.id, ecg_id)):
+    if ecg := await ecg_dal.get_by_user(current_user.id, ecg_id):
+        analyses = [DataAnalysis.model_validate(d) for d in ecg.analyses]
+        return ECGDetail(id=ecg.id, user=ecg.user_id, analyses=analyses)
+    else:
         raise HTTPException(status_code=404, detail="ECG not found")
-    return ECGDetail(id=ecg.id, user=ecg.user_id)
