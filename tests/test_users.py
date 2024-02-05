@@ -1,8 +1,10 @@
+import uuid
 from httpx import AsyncClient
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import Role
+from app.models.user import Role, UserDAL
+from app.schemas.user import User
 
 
 @pytest.mark.asyncio
@@ -59,3 +61,57 @@ async def test_user_create_no_admin_permissions(
     )
     assert response.status_code == 401
     assert response.json().get("detail") == "Not enough permissions"
+
+
+@pytest.mark.asyncio
+async def test_user_create_already_exists(
+    authenticated_client_admin: AsyncClient,
+    user: User,
+    db_session: AsyncSession,
+) -> None:
+    response = await authenticated_client_admin.post(
+        "/api/users/",
+        json={"username": user.username, "password": "user", "role": "user"},
+    )
+    assert response.status_code == 400
+    assert response.json().get("detail") == "Username already registered"
+
+
+@pytest.mark.parametrize(
+    "username, status_code",
+    [
+        ("admin", 400),  # admin user (delete yourself)
+        ("user", 200),  # regular user,
+        ("unknown", 404),  # unknown user
+    ],
+)
+@pytest.mark.asyncio
+async def test_user_delete(
+    authenticated_client_admin: AsyncClient,
+    user: User,
+    db_session: AsyncSession,
+    username: str,
+    status_code: int,
+) -> None:
+    user_dal = UserDAL(db_session)
+    user_to_delete = await user_dal.get_by_username(username)
+    user_id = user_to_delete.id if user_to_delete else uuid.uuid4()
+    response = await authenticated_client_admin.delete(f"/api/users/{user_id}")
+    assert response.status_code == status_code
+    if status_code == 200:
+        assert response.json().get("username") == user_to_delete.username
+        assert (await user_dal.get_by_username(user_to_delete.username)) is None
+
+
+@pytest.mark.asyncio
+async def test_list_users(
+    authenticated_client_admin: AsyncClient,
+    user: User,
+    admin_user: User,
+) -> None:
+    response = await authenticated_client_admin.get("/api/users/")
+    assert response.status_code == 200
+    assert {e["username"] for e in response.json()} == {
+        user.username,
+        admin_user.username,
+    }
