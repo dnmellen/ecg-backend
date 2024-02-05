@@ -1,2 +1,2 @@
 #!/bin/bash
-docker compose exec api alembic upgrade head
+docker-compose --log-level ERROR exec api alembic upgrade head

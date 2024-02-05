@@ -7,4 +7,4 @@ fi
 test_path="$1"
 shift
 
-TEST=1 docker compose run --rm -e TEST api pytest --cov=app "$test_path" "$@"
+TEST=1 docker-compose --log-level ERROR run --rm -e TEST api pytest --cov=app "$test_path" "$@"

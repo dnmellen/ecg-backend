@@ -1,3 +1,3 @@
 #!/bin/bash
-docker compose exec api python scripts/create_superuser.py "$1"
+docker-compose --log-level ERROR exec api python scripts/create_superuser.py "$1"
 
