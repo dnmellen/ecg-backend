@@ -22,5 +22,5 @@ This will start the application and the database. The application will be availa
 
 ## Documentation
 
-- API Docs: [http://localhost:8000/docs](http://localhost:8000/docs).
+- API Docs: [http://localhost:8000/api/docs](http://localhost:8000/api/docs).
 - Project documentation: ???.
