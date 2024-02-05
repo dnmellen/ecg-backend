@@ -1,0 +1,14 @@
+site_name: ECG Backend
+theme: readthedocs
+nav:
+  - Home: index.md
+  - Installation:
+    - Docker: installation/docker.md
+  - User Guide:
+    - OAuth2 Authentication:
+      - Creating Users: auth/create_users.md
+      - Login as User: auth/user_login.md
+    - Signal Processors:
+      - Introduction: processors/intro.md
+      - NumCrossesZeroSignalProcessor: processors/num_crosses_zero.md
+    - API: api.md

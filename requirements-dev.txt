@@ -3,3 +3,5 @@
 ipython==8.21.0
 ipdb==0.13.13
 pre-commit==3.6.0
+mkdocs==1.5.3
+ghp-import==2.1.0
