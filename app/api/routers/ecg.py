@@ -1,6 +1,6 @@
 import ijson
 from fastapi.params import File
-from pydantic import ValidationError
+from pydantic import UUID4, ValidationError
 from app.api.dependencies.core import DBSessionDep
 from app.api.dependencies.user import CurrentUserDep
 from fastapi import APIRouter, HTTPException, UploadFile, BackgroundTasks
@@ -142,7 +142,7 @@ async def create_ecg(
 )
 async def get_ecg(
     current_user: CurrentUserDep,
-    ecg_id: str,
+    ecg_id: UUID4,
     db_session: DBSessionDep,
 ) -> ECGDetail:
     """
