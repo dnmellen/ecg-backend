@@ -5,10 +5,10 @@ from sqlalchemy import text
 from app.models.ecg import DataAnalysisDAL, DataAnalysis as DataAnalysisModel
 from app.schemas.ecg import AnalysisStatus
 
-from . import BaseSignalProcessor
+from . import SignalProcessor
 
 
-class NumCrossesZeroSignalProcessor(BaseSignalProcessor):
+class NumCrossesZeroSignalProcessor(SignalProcessor):
     name = "num_crosses_zero"
 
     async def process(self, ecg_id: UUID) -> DataAnalysisModel:

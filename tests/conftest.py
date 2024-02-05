@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import ExitStack
+from unittest.mock import MagicMock
 from httpx import AsyncClient
 
 import pytest
@@ -7,6 +8,7 @@ from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from alembic.script import ScriptDirectory
+from pytest_mock import MockerFixture
 from app.config import settings
 from app.models.database import Base, get_db_session, sessionmanager
 from app.main import app as actual_app
@@ -144,3 +146,8 @@ async def authenticated_client_user(client, user) -> AsyncClient:
     access_token = response.json().get("access_token")
     client.headers.update({"Authorization": f"Bearer {access_token}"})
     return client
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_process_tasks(mocker: MockerFixture) -> MagicMock:
+    return mocker.patch("app.api.routers.ecg.process_signals", MagicMock())

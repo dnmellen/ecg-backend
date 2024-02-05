@@ -3,8 +3,9 @@ from fastapi.params import File
 from pydantic import ValidationError
 from app.api.dependencies.core import DBSessionDep
 from app.api.dependencies.user import CurrentUserDep
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile, BackgroundTasks
 from app.models.ecg import ECGDAL, Signal as SignalModel, ECG as ECGModel
+from app.processors import process_signals
 from app.schemas.ecg import ECG, ECGDetail, Signal
 from app.utils.core import BufferedStorage
 from app.config import settings
@@ -40,7 +41,10 @@ async def list_ecgs(
     status_code=201,
 )
 async def create_ecg(
-    current_user: CurrentUserDep, db_session: DBSessionDep, file: UploadFile = File(...)
+    current_user: CurrentUserDep,
+    db_session: DBSessionDep,
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
 ) -> ECG:
     """
     Create a new ecg
@@ -125,6 +129,9 @@ async def create_ecg(
 
     if not ecg_id:
         raise HTTPException(status_code=422, detail="Invalid input")
+
+    # Launch the background tasks to process the signals
+    process_signals(db_session, background_tasks, ecg_id)
 
     return ECG(id=ecg_id, user=current_user.id)
 

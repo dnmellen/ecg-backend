@@ -1,5 +1,6 @@
 from io import BytesIO
 import json
+from unittest.mock import MagicMock
 from httpx import AsyncClient
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +37,7 @@ async def test_create_ecg(
     db_session: AsyncSession,
     user: User,
     authenticated_client_user: AsyncClient,
+    mock_process_tasks: MagicMock,
     json_input: str,
     status_code: int,
 ) -> None:
@@ -47,10 +49,14 @@ async def test_create_ecg(
     )
     assert response.status_code == status_code
     if status_code == 201:
+        ecg_id = json.loads(json_input)["id"]
         assert response.json() == {
-            "id": json.loads(json_input)["id"],
+            "id": ecg_id,
             "user": str(user.id),
         }
+
+        # Ensure a task was created
+        mock_process_tasks.assert_called_once()
 
     await (
         db_session.rollback()
