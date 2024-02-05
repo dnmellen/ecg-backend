@@ -8,7 +8,8 @@ nav:
     - OAuth2 Authentication:
       - Creating Users: auth/create_users.md
       - Login as User: auth/user_login.md
-    - Signal Processors:
-      - Introduction: processors/intro.md
-      - NumCrossesZeroSignalProcessor: processors/num_crosses_zero.md
-    - API: api.md
+    - API Endpoints:
+      - Intro: api.md
+      - Upload ECG: ecg_create.md
+      - ECG Detail: ecg_detail.md
+    - Testing: tests.md
