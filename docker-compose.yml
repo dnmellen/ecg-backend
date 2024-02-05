@@ -12,14 +12,6 @@ services:
       backend:
         aliases:
           - db
-  redis:
-    image: redis:latest
-    volumes:
-      - redis_data:/data/
-    networks:
-      backend:
-        aliases:
-          - redis
   api:
     build: .
     command: bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -27,7 +19,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-      - redis
     volumes:
       - .:/app
     user: "${UID}:${GID}"
@@ -37,24 +28,8 @@ services:
       backend:
         aliases:
           - api
-  celery:
-    build: .
-    command: bash -c "celery -A mycurrency worker -l INFO"
-    depends_on:
-      - db
-      - redis
-    volumes:
-      - .:/app
-    user: "${UID}:${GID}"
-    env_file:
-      - .env.docker
-    networks:
-      backend:
-        aliases:
-          - celery
 volumes:
   postgres_data:
-  redis_data:
 networks:
   backend:
     driver: bridge
