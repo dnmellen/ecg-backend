@@ -27,3 +27,11 @@ Creating an admin user is necessary to create other users. To create an admin us
 ```bash
 scripts/create_admin_user.sh admin
 ```
+
+### Run the api as a development server in foreground
+
+This way of running the application is useful for development. It will start the application in the foreground and you will be able to see the logs in the terminal.
+
+```bash
+docker-compose run --rm --service-ports api
+```
